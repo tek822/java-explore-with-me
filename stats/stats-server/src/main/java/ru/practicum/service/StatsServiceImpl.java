@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ru.practicum.model.HitMapper.DtoToHit;
+import static ru.practicum.model.HitMapper.dtoToHit;
 
 @Service
 @Transactional(readOnly = true)
@@ -22,7 +22,7 @@ public class StatsServiceImpl implements StatsService {
     @Override
     @Transactional
     public void add(HitDto hitDto) {
-        statsRepository.save(DtoToHit(hitDto));
+        statsRepository.save(dtoToHit(hitDto));
     }
 
     @Override

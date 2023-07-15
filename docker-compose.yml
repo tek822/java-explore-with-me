@@ -24,19 +24,26 @@ services:
       - POSTGRES_DB=stats
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=root
-#
-#  ewm-service:
-#    ports:
-#      - "8080:8080"
-#    depends_on:
-#        - ewm-db
-#
-#  ewm-db:
-#    image: postgres:14-alpine
-#    container_name: ewm-db
-#    ports:
-#      - "5432:5432"
-#    environment:
-#      - POSTGRES_DB=ewm
-#      - POSTGRES_USER=root
-#      - POSTGRES_PASSWORD=root
+
+  ewm-service:
+    build: ewm-service
+    image: ewm-server-image
+    container_name: ewm-server
+    ports:
+      - "8080:8080"
+    depends_on:
+        - ewm-db
+    environment:
+        - EWM_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm
+        - EWM_DATASOURCE_USER=root
+        - EWM_DATASOURCE_PASSWORD=root
+
+  ewm-db:
+    image: postgres:13.7-alpine
+    container_name: ewm-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=ewm
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
