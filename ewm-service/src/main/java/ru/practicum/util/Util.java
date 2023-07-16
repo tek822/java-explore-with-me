@@ -16,7 +16,7 @@ public class Util {
 
     public static Category getCategory(CategoryRepository categoryRepository, long categoryID) {
         return  categoryRepository.findById(categoryID).orElseThrow(() ->
-                new CategoryNotFoundException("Категория с id: " + categoryID + ", не найдена")
+                new CategoryNotFoundException("Category with id=" + categoryID + " was not found.")
         );
     }
 }
