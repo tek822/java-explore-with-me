@@ -1,7 +1,6 @@
 package ru.practicum.model;
 
 import lombok.AllArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -16,8 +15,5 @@ public class Hit {
     String app;
     String uri;
     String ip;
-
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    //@Column(name = "timestamp")
     LocalDateTime timestamp;
 }
