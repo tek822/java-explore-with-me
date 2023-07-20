@@ -37,6 +37,7 @@ services:
         - EWM_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm
         - EWM_DATASOURCE_USER=root
         - EWM_DATASOURCE_PASSWORD=root
+        - STATS_SERVER_URL=http://stats-server:9090
 
   ewm-db:
     image: postgres:13.7-alpine

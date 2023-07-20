@@ -13,6 +13,9 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
+import static ru.practicum.Constants.DEFAULT_PAGE_FROM;
+import static ru.practicum.Constants.DEFAULT_PAGE_SIZE;
+
 @Slf4j
 @RestController
 @Validated
@@ -43,22 +46,21 @@ public class CategoryController {
         categoryService.delete(catId);
     }
 
-    @GetMapping("/user/categories")
+    @GetMapping("/categories")
     @ResponseStatus(HttpStatus.OK)
     public List<CategoryDto> get(
             @PositiveOrZero(message = "Параметр from >= 0")
-            @RequestParam(name = "from", defaultValue = "0") int from,
+            @RequestParam(name = "from", defaultValue = DEFAULT_PAGE_FROM) int from,
             @Positive(message = "Параметр size > 0")
-            @RequestParam(name = "size", defaultValue = "10") int size) {
+            @RequestParam(name = "size", defaultValue = DEFAULT_PAGE_SIZE) int size) {
         log.info("Запрос категорий с параметрами from: {}, size: {}", from, size);
         return categoryService.get(from, size);
     }
 
-    @GetMapping("/user/categories/{catId}")
+    @GetMapping("/categories/{catId}")
     @ResponseStatus(HttpStatus.OK)
     public CategoryDto get(@PathVariable(name = "catId", required = true) Long catId) {
         log.info("Запрошена категория с id: {}", catId);
         return categoryService.get(catId);
     }
-
 }
