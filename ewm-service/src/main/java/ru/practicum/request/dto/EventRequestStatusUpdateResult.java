@@ -8,6 +8,6 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class EventRequestStatusUpdateResult {
-    List<ParticipationRequestDto> confirmedRequest;
-    List<ParticipationRequestDto> rejectedRequest;
+    List<ParticipationRequestDto> confirmedRequests;
+    List<ParticipationRequestDto> rejectedRequests;
 }
