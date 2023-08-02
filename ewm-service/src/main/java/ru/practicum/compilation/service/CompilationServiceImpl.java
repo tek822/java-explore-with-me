@@ -3,6 +3,7 @@ package ru.practicum.compilation.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.compilation.Compilation;
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.NewCompilationDto;
@@ -10,7 +11,7 @@ import ru.practicum.compilation.dto.UpdateCompilationRequest;
 import ru.practicum.compilation.mapper.CompilationMapper;
 import ru.practicum.compilation.repository.CompilationRepository;
 import ru.practicum.event.model.Event;
-import ru.practicum.event.service.EventService;
+import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.NotFoundException;
 
 import java.util.ArrayList;
@@ -21,19 +22,21 @@ import static ru.practicum.compilation.mapper.CompilationMapper.toCompilation;
 import static ru.practicum.compilation.mapper.CompilationMapper.toCompilationDto;
 
 @Service
+@Transactional(readOnly = true)
 public class CompilationServiceImpl implements CompilationService {
     @Autowired
     private CompilationRepository compilationRepository;
     @Autowired
-    private EventService eventService;
+    private EventRepository eventRepository;
 
     @Override
+    @Transactional
     public CompilationDto add(NewCompilationDto compilationDto) {
 
         List<Event> events = new ArrayList<>();
 
         if (!compilationDto.getEvents().isEmpty()) {
-            events = eventService.getEventsByIds(compilationDto.getEvents());
+            events = eventRepository.findAllByIdIn(compilationDto.getEvents());
             checkEventsIsPresent(compilationDto.getEvents(), events);
         }
 
@@ -41,14 +44,13 @@ public class CompilationServiceImpl implements CompilationService {
         return toCompilationDto(compilationRepository.save(compilation));
     }
 
-
-
     @Override
+    @Transactional
     public CompilationDto update(long compId, UpdateCompilationRequest updateCompilationRequest) {
         Compilation compilation = getCompilation(compilationRepository, compId);
         if (updateCompilationRequest.getEvents() != null) {
             if (!updateCompilationRequest.getEvents().isEmpty()) {
-                List<Event> events = eventService.getEventsByIds(updateCompilationRequest.getEvents());
+                List<Event> events = eventRepository.findAllByIdIn(updateCompilationRequest.getEvents());
                 checkEventsIsPresent(updateCompilationRequest.getEvents(), events);
                 compilation.setEvents(events);
             } else {
@@ -65,6 +67,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
+    @Transactional
     public void delete(long compId) {
         Compilation compilation = getCompilation(compilationRepository, compId);
         compilationRepository.delete(compilation);

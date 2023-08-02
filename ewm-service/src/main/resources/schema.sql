@@ -50,12 +50,14 @@ CREATE TABLE IF NOT EXISTS requests (
     created TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     status VARCHAR(15),
     CONSTRAINT requests_events_event_id_fk FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
-    CONSTRAINT requests_events_requester_id_fk FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE CASCADE
+    CONSTRAINT requests_events_requester_id_fk FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT unique_event_requester UNIQUE (event_id, requester_id)
 );
 
 CREATE TABLE IF NOT EXISTS compilations_events (
     compilation_id BIGINT NOT NULL,
     event_id BIGINT NOT NULL,
     CONSTRAINT compilations_events_compilations_compilation_id_fk FOREIGN KEY (compilation_id) REFERENCES compilations(id) ON DELETE CASCADE,
-    CONSTRAINT compilations_events_events_event_id_fk FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
+    CONSTRAINT compilations_events_events_event_id_fk FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+    CONSTRAINT unque_compilation_event UNIQUE (compilation_id, event_id)
 );

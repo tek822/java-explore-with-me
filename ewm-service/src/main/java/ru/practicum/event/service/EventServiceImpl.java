@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.Category;
 import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.compilation.repository.CompilationRepository;
@@ -22,7 +23,7 @@ import ru.practicum.location.dto.LocationDto;
 import ru.practicum.location.repository.LocationRepository;
 import ru.practicum.request.model.Request;
 import ru.practicum.request.model.RequestStatus;
-import ru.practicum.request.service.RequestService;
+import ru.practicum.request.repository.RequestRepository;
 import ru.practicum.stats.StatsService;
 import ru.practicum.user.User;
 import ru.practicum.user.repository.UserRepository;
@@ -32,7 +33,6 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.*;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -43,10 +43,13 @@ import static ru.practicum.Constants.USER_TIME_GAP;
 import static ru.practicum.category.service.CategoryServiceImpl.getCategory;
 import static ru.practicum.event.dto.EventMapper.newEventDtoToEvent;
 import static ru.practicum.event.dto.EventMapper.toEventFullDto;
+import static ru.practicum.request.service.RequestServiceImpl.getConfirmedRequests;
+import static ru.practicum.request.service.RequestServiceImpl.getConfirmedRequestsByEvents;
 import static ru.practicum.user.service.UserServiceImpl.getUser;
 
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 public class EventServiceImpl implements EventService {
     @Autowired
     private EventRepository eventRepository;
@@ -61,11 +64,12 @@ public class EventServiceImpl implements EventService {
     @Autowired
     private StatsService statsService;
     @Autowired
-    private RequestService requestService;
+    private RequestRepository requestRepository;
     @PersistenceContext
     EntityManager entityManager;
 
     @Override
+    @Transactional
     public EventFullDto add(long userId, NewEventDto eventDto) {
         if (eventDto.getEventDate().isBefore(LocalDateTime.now().plusHours(USER_TIME_GAP))) {
             //  в спецификации должен быть 409, но тесты требуют 400 !
@@ -113,7 +117,7 @@ public class EventServiceImpl implements EventService {
         List<Event> events = entityManager.createQuery(query).setFirstResult(from).setMaxResults(size).getResultList();
 
         Map<Long, Long> views = statsService.getViews(events);
-        Map<Long, Long> confirmedRequests = requestService.getConfirmedRequestsByEvents(events);
+        Map<Long, Long> confirmedRequests = getConfirmedRequestsByEvents(requestRepository, events);
 
         List<EventFullDto> eventDtos = events.stream().map(EventMapper::toEventFullDto).collect(Collectors.toList());
 
@@ -126,6 +130,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public EventFullDto updateAdminEventById(Long eventId, UpdateEventAdminRequest updateEventAdminRequest) {
         Event event = getEvent(eventRepository, eventId);
 
@@ -175,7 +180,7 @@ public class EventServiceImpl implements EventService {
 
         EventFullDto eventDto = toEventFullDto(eventRepository.save(event));
         Map<Long, Long> views = statsService.getViews(List.of(event));
-        Map<Long, Long> confirmedRequests = requestService.getConfirmedRequestsByEvents(List.of(event));
+        Map<Long, Long> confirmedRequests = getConfirmedRequestsByEvents(requestRepository, List.of(event));
 
         eventDto.setViews(views.getOrDefault(eventId, 0L));
         eventDto.setConfirmedRequests(confirmedRequests.getOrDefault(eventId, 0L));
@@ -188,7 +193,7 @@ public class EventServiceImpl implements EventService {
         User user = getUser(userRepository, userId);
         Event event = getEvent(eventRepository, eventId);
         Long views = statsService.getViews(List.of(event)).getOrDefault(eventId, 0L);
-        Long confirmedRequests = requestService.getConfirmedRequestsByEvents(List.of(event)).getOrDefault(eventId, 0L);
+        Long confirmedRequests = getConfirmedRequestsByEvents(requestRepository, List.of(event)).getOrDefault(eventId, 0L);
         return toEventFullDto(event, views, confirmedRequests);
     }
 
@@ -198,7 +203,7 @@ public class EventServiceImpl implements EventService {
         List<Event> events = eventRepository.findAllByInitiatorId(userId, PageRequest.of(from / size, size));
 
         Map<Long, Long> views = statsService.getViews(events);
-        Map<Long, Long> confirmedRequests = requestService.getConfirmedRequestsByEvents(events);
+        Map<Long, Long> confirmedRequests = getConfirmedRequestsByEvents(requestRepository, events);
 
         List<EventShortDto> eventDtos = events.stream().map(EventMapper::toEventShortDto).collect(Collectors.toList());
 
@@ -210,6 +215,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public EventFullDto updatePrivateEventById(long userId, long eventId, UpdateEventUserRequest eventDto) {
         User user = getUser(userRepository, userId);
         Event event = getEvent(eventRepository, eventId);
@@ -272,7 +278,7 @@ public class EventServiceImpl implements EventService {
         }
 
         Long views = statsService.getViews(List.of(event)).getOrDefault(eventId, 0L);
-        Long confirmedRequests = requestService.getConfirmedRequestsByEvents(List.of(event)).getOrDefault(eventId, 0L);
+        Long confirmedRequests = getConfirmedRequestsByEvents(requestRepository, List.of(event)).getOrDefault(eventId, 0L);
 
         return toEventFullDto(eventRepository.save(event), views, confirmedRequests);
     }
@@ -286,7 +292,7 @@ public class EventServiceImpl implements EventService {
         }
         //информация о событии должна включать в себя количество просмотров и количество подтвержденных запросов
         Long views = statsService.getViews(List.of(event)).getOrDefault(eventId, 0L);
-        Long confirmedRequests = requestService.getConfirmedRequests(event);
+        Long confirmedRequests = getConfirmedRequests(requestRepository,event);
         //информацию о том, что по этому эндпоинту был осуществлен и обработан запрос, нужно сохранить в сервисе статистики
         statsService.addHit(request);
         return toEventFullDto(event, views, confirmedRequests);
@@ -366,7 +372,7 @@ public class EventServiceImpl implements EventService {
 
         // информация о каждом событии должна включать в себя количество просмотров и количество уже одобренных заявок на участие
         Map<Long, Long> views = statsService.getViews(events);
-        Map<Long, Long> confirmedRequests = requestService.getConfirmedRequestsByEvents(events);
+        Map<Long, Long> confirmedRequests = getConfirmedRequestsByEvents(requestRepository, events);
 
         List<EventShortDto> eventDtos = events.stream().map(EventMapper::toEventShortDto).collect(Collectors.toList());
 
@@ -388,16 +394,6 @@ public class EventServiceImpl implements EventService {
         statsService.addHit(request);
         return eventDtos;
     }
-
-    @Override
-    public List<Event> getEventsByIds(List<Long> ids) {
-
-        if (ids == null || ids.isEmpty())
-            return new ArrayList<>();
-
-        return eventRepository.findAllByIdIn(ids);
-    }
-
 
     private void validateDates(LocalDateTime start, LocalDateTime end) {
         if (start != null && end != null && start.isAfter(end)) {
