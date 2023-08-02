@@ -3,6 +3,7 @@ package ru.practicum.request.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.EventState;
 import ru.practicum.event.repository.EventRepository;
@@ -29,6 +30,7 @@ import static ru.practicum.user.service.UserServiceImpl.getUser;
 
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 public class RequestServiceImpl implements RequestService {
     @Autowired
     private UserRepository userRepository;
@@ -38,6 +40,7 @@ public class RequestServiceImpl implements RequestService {
     private RequestRepository requestRepository;
 
     @Override
+    @Transactional
     public ParticipationRequestDto add(long userId, long eventId) {
         User user = getUser(userRepository, userId);
         Event event = getEvent(eventRepository, eventId);
@@ -83,6 +86,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
+    @Transactional
     public ParticipationRequestDto cancel(long userId, long requestId) {
         User requester = getUser(userRepository, requestId);
         Request request = getRequest(requestRepository, requestId);
@@ -109,6 +113,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
+    @Transactional
     public EventRequestStatusUpdateResult updateRequestsStatus(
             long userId, long eventId, EventRequestStatusUpdateRequest eventRequestStatusUpdateRequest) {
 
@@ -173,17 +178,20 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public Long getConfirmedRequests(Event event) {
-        Map<Long, Long> confirmedRequests = getConfirmedRequestsByEvents(List.of(event));
+        return getConfirmedRequests(this.requestRepository, event);
+    }
+
+    public static Long getConfirmedRequests(RequestRepository requestRepository, Event event) {
+        Map<Long, Long> confirmedRequests = getConfirmedRequestsByEvents(requestRepository, List.of(event));
         return confirmedRequests.getOrDefault(event.getId(), 0L);
     }
 
-    @Override
-    public Map<Long, Long> getConfirmedRequestsByEvents(List<Event> events) {
+    public static Map<Long, Long> getConfirmedRequestsByEvents(RequestRepository requestRepository, List<Event> events) {
         List<Long> eventIds = events.stream().map(Event::getId).collect(Collectors.toList());
-        return getConfirmedRequestsByIds(eventIds);
+        return getConfirmedRequestsByIds(requestRepository, eventIds);
     }
 
-    private Map<Long, Long> getConfirmedRequestsByIds(List<Long> eventIds) {
+    public static Map<Long, Long> getConfirmedRequestsByIds(RequestRepository requestRepository, List<Long> eventIds) {
         Map<Long, Long> confirmedRequests = new HashMap<>();
         List<ConfirmedRequestsDto> requests = requestRepository.getConfirmedRequests(eventIds);
         requests.forEach(r -> confirmedRequests.put(r.getEventId(), r.getConfirmedRequests()));

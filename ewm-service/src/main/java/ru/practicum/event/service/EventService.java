@@ -1,7 +1,6 @@
 package ru.practicum.event.service;
 
 import ru.practicum.event.dto.*;
-import ru.practicum.event.model.Event;
 import ru.practicum.event.model.EventSortOrder;
 import ru.practicum.event.model.EventState;
 
@@ -41,6 +40,4 @@ public interface EventService {
                                         Integer from,
                                         Integer size,
                                         HttpServletRequest request);
-
-    List<Event> getEventsByIds(List<Long> events);
 }
