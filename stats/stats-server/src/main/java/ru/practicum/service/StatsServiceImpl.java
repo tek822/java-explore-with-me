@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.HitDto;
 import ru.practicum.dto.StatsDto;
+import ru.practicum.exception.BadRequestException;
 import ru.practicum.repository.StatsRepository;
 
 import java.time.LocalDateTime;
@@ -27,6 +28,10 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     public List<StatsDto> get(LocalDateTime start, LocalDateTime end, Boolean unique, List<String> uris) {
+        if (end.isBefore(start)) {
+            throw new BadRequestException(String.format(
+                    "Ошибка в задании диапазона времени start - end : %s - %s", start, end));
+        }
         List<StatsDto> hits = new ArrayList<>();
         if (uris == null || uris.isEmpty()) {
             if (unique) {
