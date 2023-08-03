@@ -18,7 +18,7 @@ import ru.practicum.exception.BadRequestException;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.ForbiddenException;
 import ru.practicum.exception.NotFoundException;
-import ru.practicum.location.Location;
+import ru.practicum.location.model.Location;
 import ru.practicum.location.dto.LocationDto;
 import ru.practicum.location.repository.LocationRepository;
 import ru.practicum.request.model.Request;
@@ -148,8 +148,11 @@ public class EventServiceImpl implements EventService {
         if (updateEventAdminRequest.getDescription() != null)
             event.setDescription(updateEventAdminRequest.getDescription());
 
-        if (updateEventAdminRequest.getLocation() != null)
-            event.setLocation(getLocation((updateEventAdminRequest.getLocation())));
+        if (updateEventAdminRequest.getLocation() != null) {
+            // @Transactional должно обновить связанные объекты
+            event.getLocation().setLat(updateEventAdminRequest.getLocation().getLat());
+            event.getLocation().setLon(updateEventAdminRequest.getLocation().getLon());
+        }
 
         if (updateEventAdminRequest.getPaid() != null)
             event.setPaid(updateEventAdminRequest.getPaid());
@@ -248,8 +251,10 @@ public class EventServiceImpl implements EventService {
         if (eventDto.getEventDate() != null)
             event.setEventDate(eventDto.getEventDate());
 
-        if (eventDto.getLocation() != null)
-            event.setLocation(getLocation(eventDto.getLocation()));
+        if (eventDto.getLocation() != null) {
+            event.getLocation().setLat(eventDto.getLocation().getLat());
+            event.getLocation().setLon(eventDto.getLocation().getLon());
+        }
 
         if (eventDto.getPaid() != null)
             event.setPaid(eventDto.getPaid());

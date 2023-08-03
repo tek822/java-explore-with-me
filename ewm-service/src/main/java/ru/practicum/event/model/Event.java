@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.category.Category;
-import ru.practicum.location.Location;
+import ru.practicum.location.model.Location;
 import ru.practicum.user.User;
 
 import javax.persistence.*;

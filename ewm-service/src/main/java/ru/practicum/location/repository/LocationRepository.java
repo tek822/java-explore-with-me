@@ -1,7 +1,7 @@
 package ru.practicum.location.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.practicum.location.Location;
+import ru.practicum.location.model.Location;
 
 import java.util.Optional;
 
