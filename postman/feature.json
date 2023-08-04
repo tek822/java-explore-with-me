@@ -1646,7 +1646,7 @@
 					"    constructor() {}",
 					"",
 					"    findObjectById(array, id) {",
-					"        for (i = 0; i<array.length; i++) {",
+					"        for (let i = 0; i<array.length; i++) {",
 					"            if (array[i].id == id) {",
 					"                return (array[i]);",
 					"            }",
