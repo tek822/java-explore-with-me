@@ -1059,20 +1059,27 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"const utils = new Utils();",
+									"",
 									"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {",
 									"    pm.response.to.have.status(200);",
 									"    pm.response.to.be.withBody;",
 									"    pm.response.to.be.json;",
 									"});",
 									"",
-									"const source = pm.collectionVariables.get('response1');",
+									"const source1 = pm.collectionVariables.get('response1');",
+									"const source2 = pm.collectionVariables.get('response2');",
 									"const target = pm.response.json();",
-									"let length = target.length;",
+									"console.log(\"source1.id \" + source1.id);",
+									"event1 = utils.findObjectById(target, source1.id);",
+									"console.log(event1);",
+									"console.log(\"source2.id \" + source2.id);",
+									"event2 = utils.findObjectById(target, source2.id);",
 									"",
 									"pm.test(\"Событие должно содержать поля: id\", function () {",
-									"pm.expect(target[length - 1]).to.have.property('id');",
-									"pm.expect(target[length - 1].id).to.equal(source.id, \"Должно попадать первое событие из двух добавленных\");",
-									"",
+									"    pm.expect(event1).to.have.property('id');",
+									"    pm.expect(event1.name).to.equal(source1.name, \"Должно попадать первое событие из двух добавленных\");",
+									"    pm.expect(event2, \"Второе событие не должно попасть в выборку\").to.be.undefined; ",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1094,7 +1101,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/events?lat={{lat}}&lon={{lon}}&radius={{radius}}",
+							"raw": "{{baseUrl}}/events?lat={{lat}}&lon={{lon}}&radius={{radius}}&size=1000",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1113,6 +1120,10 @@
 								{
 									"key": "radius",
 									"value": "{{radius}}"
+								},
+								{
+									"key": "size",
+									"value": "1000"
 								}
 							]
 						}
@@ -1178,6 +1189,8 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"const utils = new Utils();",
+									"",
 									"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {",
 									"    pm.response.to.have.status(200);",
 									"    pm.response.to.be.withBody;",
@@ -1187,13 +1200,15 @@
 									"const source1 = pm.collectionVariables.get('response1');",
 									"const source2 = pm.collectionVariables.get('response2');",
 									"const target = pm.response.json();",
-									"let length = target.length;",
+									"",
+									"event1 = utils.findObjectById(target, source1.id);",
+									"event2 = utils.findObjectById(target, source2.id);",
 									"",
 									"pm.test(\"Событие должно содержать поля: id,\", function () {",
-									"    pm.expect(target[length - 2]).to.have.property('id');",
-									"    pm.expect(target[length - 2].id).to.equal(source1.id, \"Должно попадать первое событие из двух добавленных\");",
-									"    pm.expect(target[length - 1]).to.have.property('id');",
-									"    pm.expect(target[length - 1].id).to.equal(source2.id, \"Должно попадать второе событие из двух добавленных\");",
+									"    pm.expect(event1).to.have.property('id');",
+									"    pm.expect(event1.name).to.equal(source1.name, \"Должно попадать первое событие из двух добавленных\");",
+									"    pm.expect(event2).to.have.property('id');",
+									"    pm.expect(event2.name).to.equal(source2.name, \"Должно попадать второе событие из двух добавленных\");",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1312,6 +1327,8 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"const utils = new Utils();",
+									"",
 									"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {",
 									"    pm.response.to.have.status(200);",
 									"    pm.response.to.be.withBody;",
@@ -1321,13 +1338,15 @@
 									"const source1 = pm.collectionVariables.get('response1');",
 									"const source2 = pm.collectionVariables.get('response2');",
 									"const target = pm.response.json();",
-									"let length = target.length;",
+									"",
+									"event1 = utils.findObjectById(target, source1.id);",
+									"event2 = utils.findObjectById(target, source2.id);",
 									"",
 									"pm.test(\"Событие должно содержать поля: id,\", function () {",
-									"    pm.expect(target[length - 2]).to.have.property('id');",
-									"    pm.expect(target[length - 2].id).to.equal(source1.id, \"Должно попадать первое событие из двух добавленных\");",
-									"    pm.expect(target[length - 1]).to.have.property('id');",
-									"    pm.expect(target[length - 1].id).to.equal(source2.id, \"Должно попадать второе событие из двух добавленных\");",
+									"    pm.expect(event1).to.have.property('id');",
+									"    pm.expect(event1.name).to.equal(source1.name, \"Должно попадать первое событие из двух добавленных\");",
+									"    pm.expect(event2).to.have.property('id');",
+									"    pm.expect(event2.name).to.equal(source2.name, \"Должно попадать второе событие из двух добавленных\");",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1578,6 +1597,18 @@
 					"            counter += 1;",
 					"        }",
 					"        return result;",
+					"    }",
+					"}",
+					"",
+					"Utils = class {",
+					"    constructor() {}",
+					"",
+					"    findObjectById(array, id) {",
+					"        for (i = 0; i<array.length; i++) {",
+					"            if (array[i].id == id) {",
+					"                return (array[i]);",
+					"            }",
+					"        }",
 					"    }",
 					"}"
 				]
