@@ -67,6 +67,7 @@ public class AreaServiceImpl implements AreaService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AreaDto get(long areaId) {
         Area area = getArea(areaRepository, areaId);
         log.info("public pапрос на получение локации с id: {}, area: {}", areaId, area);
@@ -74,12 +75,14 @@ public class AreaServiceImpl implements AreaService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<AreaDto> get(int from, int size) {
         PageRequest page = PageRequest.of(from / size, size);
         Page<Area> areas = areaRepository.findAll(page);
         return areas.stream().map(LocationMapper::toAreaDto).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public static Area getArea(AreaRepository areaRepository, long areaId) {
         return areaRepository.findById(areaId).orElseThrow(() ->
                 new NotFoundException(String.format("Локация с id: %d, не найдена", areaId))

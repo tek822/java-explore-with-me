@@ -34,7 +34,7 @@ public class LocationController {
 
     @PatchMapping(path = "/admin/locations/{locationId}")
     @ResponseStatus(HttpStatus.OK)
-    public AreaDto update(@PathVariable(name = "locationId", required = true) long locationId,
+    public AreaDto update(@PathVariable(name = "locationId") long locationId,
                           @RequestBody UpdateAreaDto updateAreaDto) {
         log.info("PATCH запрос на обновление локации с id: {}, update: {}", locationId, updateAreaDto);
         return areaService.update(locationId, updateAreaDto);
@@ -42,14 +42,14 @@ public class LocationController {
 
     @DeleteMapping(path = "/admin/locations/{locationId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable(name = "locationId", required = true) long locationId) {
+    public void delete(@PathVariable(name = "locationId") long locationId) {
         log.info("DELETE запрос на удаление локации с id: {}", locationId);
         areaService.delete(locationId);
     }
 
     @GetMapping(path = "/locations/{locationId}")
     @ResponseStatus(HttpStatus.OK)
-    public AreaDto get(@PathVariable(name = "locationId", required = true) long locationId) {
+    public AreaDto get(@PathVariable(name = "locationId") long locationId) {
         log.info("PUBLIC GET запрос на получение локации с id: {}", locationId);
         return areaService.get(locationId);
     }

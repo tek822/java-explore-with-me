@@ -379,7 +379,7 @@ public class EventServiceImpl implements EventService {
 
             } else if (lat != null || lon != null || radius != null) {
                 throw new BadRequestException(String.format(
-                        "Для поиска должны быть заданы все параметры локации: lat=%d, lon=%d, radius=%d", lat, lon, radius));
+                        "Для поиска должны быть заданы все параметры локации: lat=%.5f, lon=%.5f, radius=%.5f", lat, lon, radius));
             }
         }
 

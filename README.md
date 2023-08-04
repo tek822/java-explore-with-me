@@ -1,5 +1,5 @@
 # java-explore-with-me
-Template repository for ExploreWithMe project.
+Repository for ExploreWithMe project.
 
 PullRequest feature_location_processing:
 
