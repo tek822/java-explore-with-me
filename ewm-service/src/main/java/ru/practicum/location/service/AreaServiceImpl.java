@@ -80,7 +80,7 @@ public class AreaServiceImpl implements AreaService {
         return areas.stream().map(LocationMapper::toAreaDto).collect(Collectors.toList());
     }
 
-    private Area getArea(AreaRepository areaRepository, long areaId) {
+    public static Area getArea(AreaRepository areaRepository, long areaId) {
         return areaRepository.findById(areaId).orElseThrow(() ->
                 new NotFoundException(String.format("Локация с id: %d, не найдена", areaId))
         );

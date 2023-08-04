@@ -18,8 +18,10 @@ import ru.practicum.exception.BadRequestException;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.ForbiddenException;
 import ru.practicum.exception.NotFoundException;
-import ru.practicum.location.model.Location;
 import ru.practicum.location.dto.LocationDto;
+import ru.practicum.location.model.Area;
+import ru.practicum.location.model.Location;
+import ru.practicum.location.repository.AreaRepository;
 import ru.practicum.location.repository.LocationRepository;
 import ru.practicum.request.model.Request;
 import ru.practicum.request.model.RequestStatus;
@@ -43,6 +45,7 @@ import static ru.practicum.Constants.USER_TIME_GAP;
 import static ru.practicum.category.service.CategoryServiceImpl.getCategory;
 import static ru.practicum.event.dto.EventMapper.newEventDtoToEvent;
 import static ru.practicum.event.dto.EventMapper.toEventFullDto;
+import static ru.practicum.location.service.AreaServiceImpl.getArea;
 import static ru.practicum.request.service.RequestServiceImpl.getConfirmedRequests;
 import static ru.practicum.request.service.RequestServiceImpl.getConfirmedRequestsByEvents;
 import static ru.practicum.user.service.UserServiceImpl.getUser;
@@ -65,6 +68,8 @@ public class EventServiceImpl implements EventService {
     private StatsService statsService;
     @Autowired
     private RequestRepository requestRepository;
+    @Autowired
+    private AreaRepository areaRepository;
     @PersistenceContext
     EntityManager entityManager;
 
@@ -234,6 +239,7 @@ public class EventServiceImpl implements EventService {
         }
 
         validateEventDate(event.getEventDate(), USER_TIME_GAP);
+
         if (eventDto.getEventDate() != null) {
             validateEventDate(eventDto.getEventDate(), USER_TIME_GAP);
             event.setEventDate(eventDto.getEventDate());
@@ -313,7 +319,11 @@ public class EventServiceImpl implements EventService {
                                                EventSortOrder sort,
                                                Integer from,
                                                Integer size,
-                                               HttpServletRequest request) {
+                                               HttpServletRequest request,
+                                               Long areaId,
+                                               Float lat,
+                                               Float lon,
+                                               Float radius) {
         validateDates(rangeStart, rangeEnd);
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -334,6 +344,43 @@ public class EventServiceImpl implements EventService {
                             cb.like(cb.lower(root.get("annotation")), pattern),
                             cb.like(cb.lower(root.get("description")), pattern)
                     ));
+        }
+
+        if (areaId != null) {
+            Area area = getArea(areaRepository, areaId);
+            lat = area.getLocation().getLat();
+            lon = area.getLocation().getLon();
+            radius = area.getRadius();
+
+            criteria = cb.and(criteria,
+                    cb.greaterThanOrEqualTo(
+                            cb.literal(radius),
+                            cb.function("distance", Float.class,
+                                    cb.literal(lat),
+                                    cb.literal(lon),
+                                    root.<Location>get("location").get("lat"),
+                                    root.<Location>get("location").get("lon")
+                            )
+                    )
+            );
+        } else {
+            if (lat != null && lon != null && radius != null) {
+                criteria = cb.and(criteria,
+                        cb.greaterThanOrEqualTo(
+                                cb.literal(radius),
+                                cb.function("distance", Float.class,
+                                        cb.literal(lat),
+                                        cb.literal(lon),
+                                        root.<Location>get("location").get("lat"),
+                                        root.<Location>get("location").get("lon")
+                                )
+                        )
+                );
+
+            } else if (lat != null || lon != null || radius != null) {
+                throw new BadRequestException(String.format(
+                        "Для поиска должны быть заданы все параметры локации: lat=%d, lon=%d, radius=%d", lat, lon, radius));
+            }
         }
 
         if (categories != null && !categories.isEmpty())

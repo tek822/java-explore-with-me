@@ -37,11 +37,17 @@ public class PublicEventController {
             @RequestParam(required = false) EventSortOrder sort,
             @RequestParam(required = false, defaultValue = DEFAULT_PAGE_FROM) @PositiveOrZero Integer from,
             @RequestParam(required = false, defaultValue = DEFAULT_PAGE_SIZE) @Positive Integer size,
+            @RequestParam(required = false) Long areaId,
+            @RequestParam(required = false) Float lat,
+            @RequestParam(required = false) Float lon,
+            @RequestParam(required = false) Float radius,
             HttpServletRequest request
     ) {
-        log.info("Запрос событий с параметрами\ntext: {}\ncategories: {}\npaid: {}\nrangeStart: {}\nrangeEnd: {}\navailable:{}, sort: {}",
-                text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort);
-        return eventService.getPublicEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, request);
+        log.info("Запрос событий с параметрами\ntext: {}\ncategories: {}\npaid: {}\nrangeStart: {}\nrangeEnd: {}\n" +
+                        "\navailable:{}, \nsort: {},\narea: {},\nlat: {},\nlon: {},\nradius: {}",
+                text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, areaId, lat, lon, radius);
+        return eventService.getPublicEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable,
+                sort, from, size, request, areaId, lat, lon, radius);
     }
 
     @GetMapping("/{eventId}")
