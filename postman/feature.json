@@ -86,6 +86,10 @@
 												"type": "text"
 											}
 										],
+										"body": {
+											"mode": "raw",
+											"raw": "{{request_body}}"
+										},
 										"url": {
 											"raw": "{{baseUrl}}/admin/locations/",
 											"host": [
@@ -172,6 +176,10 @@
 												"type": "text"
 											}
 										],
+										"body": {
+											"mode": "raw",
+											"raw": "{{request_body}}"
+										},
 										"url": {
 											"raw": "{{baseUrl}}/admin/locations/",
 											"host": [
@@ -258,6 +266,10 @@
 												"type": "text"
 											}
 										],
+										"body": {
+											"mode": "raw",
+											"raw": "{{request_body}}"
+										},
 										"url": {
 											"raw": "{{baseUrl}}/admin/locations/",
 											"host": [
@@ -344,6 +356,10 @@
 												"type": "text"
 											}
 										],
+										"body": {
+											"mode": "raw",
+											"raw": "{{request_body}}"
+										},
 										"url": {
 											"raw": "{{baseUrl}}/admin/locations/",
 											"host": [
@@ -430,6 +446,10 @@
 												"type": "text"
 											}
 										],
+										"body": {
+											"mode": "raw",
+											"raw": "{{request_body}}"
+										},
 										"url": {
 											"raw": "{{baseUrl}}/admin/locations/",
 											"host": [
@@ -656,6 +676,10 @@
 								"type": "text"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": "{{request_body}}"
+						},
 						"url": {
 							"raw": "{{baseUrl}}/admin/locations/:locationId",
 							"host": [
@@ -757,6 +781,10 @@
 								"type": "text"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": "{{request_body}}"
+						},
 						"url": {
 							"raw": "{{baseUrl}}/admin/locations/:locationId",
 							"host": [
@@ -826,6 +854,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"const utils = new Utils();",
 									"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {",
 									"    pm.response.to.have.status(200);",
 									"    pm.response.to.be.withBody;",
@@ -857,6 +886,9 @@
 							}
 						}
 					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
 					"request": {
 						"method": "GET",
 						"header": [
@@ -871,13 +903,23 @@
 								"type": "text"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": "{{request_body}}"
+						},
 						"url": {
-							"raw": "{{baseUrl}}/locations",
+							"raw": "{{baseUrl}}/locations?size=1000",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"locations"
+							],
+							"query": [
+								{
+									"key": "size",
+									"value": "1000"
+								}
 							]
 						}
 					},
