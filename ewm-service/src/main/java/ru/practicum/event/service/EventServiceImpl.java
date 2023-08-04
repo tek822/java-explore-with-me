@@ -303,7 +303,7 @@ public class EventServiceImpl implements EventService {
         }
         //информация о событии должна включать в себя количество просмотров и количество подтвержденных запросов
         Long views = statsService.getViews(List.of(event)).getOrDefault(eventId, 0L);
-        Long confirmedRequests = getConfirmedRequests(requestRepository,event);
+        Long confirmedRequests = getConfirmedRequests(requestRepository, event);
         //информацию о том, что по этому эндпоинту был осуществлен и обработан запрос, нужно сохранить в сервисе статистики
         statsService.addHit(request);
         return toEventFullDto(event, views, confirmedRequests);
