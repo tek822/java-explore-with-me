@@ -39,5 +39,9 @@ public interface EventService {
                                         EventSortOrder sort,
                                         Integer from,
                                         Integer size,
-                                        HttpServletRequest request);
+                                        HttpServletRequest request,
+                                        Long areaId,
+                                        Float lat,
+                                        Float lon,
+                                        Float radius);
 }
